@@ -4,7 +4,7 @@ TARGET = x86_64-unknown-none
 
 KERNEL = LucarioOS.elf
 
-DEBUG = false
+DEBUG ?= false
 
 ifeq ($(DEBUG),true)
 	CARGO_DEBUG = 
