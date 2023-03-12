@@ -2,3 +2,4 @@
 /isodir
 /LucarioOS.iso
 *.o
+*.elf
