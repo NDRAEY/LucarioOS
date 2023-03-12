@@ -1,4 +1,5 @@
 .code32
+
 .set ALIGN,		 						1<<0
 .set MEMINFO,	 						1<<1
 .set VBE_MODE,   						1<<2
@@ -25,7 +26,7 @@ _init_early:
 
 		# init FPU
 		fninit
-		fldcw (conword)
+		fldcw (__fpu_control_word)
 
 		# enable SSE
 		mov %cr0, %eax
@@ -44,7 +45,7 @@ _init_early:
 
 		hlt
 
-conword:
+__fpu_control_word:
 		.word 0x37f
 
 loop:

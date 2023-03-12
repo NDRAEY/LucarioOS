@@ -7,6 +7,7 @@ macro_rules! debug_str {
         $(
             crate::log::debug_write_string($x);
         )*
+        crate::log::debug_write_string("\n");
     }
 }
 

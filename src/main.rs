@@ -2,7 +2,6 @@
 #![no_main]
 
 #![feature(lang_items)]
-#![feature(panic_info_message)]
 
 mod multiboot;
 mod ports;
@@ -11,17 +10,19 @@ mod ports;
 mod log;
 
 use multiboot::MultibootHeader;
+use core::panic;
 
 #[no_mangle]
 pub extern "C" fn _start(multiboot2_stack: u32, multiboot_structure_addr: u32) -> ! {
 	debug!("Hello world from Rust!");
 
 	let mb: *mut MultibootHeader = multiboot_structure_addr as *mut MultibootHeader;
-	let addr = unsafe { (*mb).framebuffer_addr };
+	// let addr = unsafe { (*mb).framebuffer_addr };
 
+	// let width = unsafe { (*mb).framebuffer_width } as usize;
+	// let height = unsafe { (*mb).framebuffer_height } as usize;
 
-	let width = unsafe { (*mb).framebuffer_width } as usize;
-	let height = unsafe { (*mb).framebuffer_height } as usize;
+	// panic!();
 
 	// let buffer: &mut [u8] = unsafe { slice::from_raw_parts_mut(addr as *mut u8, width * height * 3) };
 
@@ -37,9 +38,15 @@ pub extern "C" fn _start(multiboot2_stack: u32, multiboot_structure_addr: u32) -
 }
 
 #[lang = "eh_personality"]
+#[no_mangle]
 extern "C" fn eh_personality() {}
 
+
 #[panic_handler]
-fn __panic_hdl(_info: &core::panic::PanicInfo) -> ! {
+#[inline(never)]
+#[no_mangle]
+pub extern "C" fn __panic_handler(info: &panic::PanicInfo) -> ! {
+	// debug!("Panic! Message: ", info.message().unwrap().as_str().unwrap());
 	loop {}	
 }
+
