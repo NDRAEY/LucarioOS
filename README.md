@@ -10,8 +10,9 @@ Now, It only prints "Hello from Rust!" to the COM1 port.
 
 
 To build LucarioOS:
+1. Clone this repository to your machine.
+2. Enter the `LucarioOS` directory.
+3. Run ```make``` command
 
-	- Clone repository
-	- Run ```make``` command
-	
+
 To run LucarioOS, run: ```make everything``` command
