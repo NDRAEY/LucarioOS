@@ -1,0 +1,1 @@
+NASM = asm/multiboot.o

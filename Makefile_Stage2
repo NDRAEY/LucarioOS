@@ -1,0 +1,21 @@
+include include.mk
+
+DEPS = target/x86_64-unknown-none/release/deps/
+OBJS = $(wildcard $(DEPS)/*.o)
+
+KERNEL = LucarioOS.elf
+
+all: $(KERNEL)
+
+$(KERNEL):
+	$(LD) $(OBJS) $(NASM) -T src/link.ld -m elf_x86_64 -o $(KERNEL)
+
+iso: $(KERNEL)
+	-mkdir -p isodir/boot/grub
+	mv $(KERNEL) isodir/boot/
+	cp src/grub.cfg isodir/boot/grub
+
+	grub-mkrescue isodir/ -o LucarioOS.iso -V LucarioOS
+
+run:
+	qemu-system-x86_64 -enable-kvm -m 16M -serial mon:stdio -cdrom LucarioOS.iso
