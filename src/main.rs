@@ -7,17 +7,21 @@
 mod multiboot;
 mod ports;
 
+use core::panic::PanicInfo;
+
 #[macro_use]
 mod log;
 
 use multiboot::MultibootHeader;
-use core::panic;
+
+#[macro_use]
+use crate::log::log::*;
 
 #[no_mangle]
 pub extern "C" fn _start(multiboot2_stack: u32, multiboot_structure_addr: u32) -> ! {
 	debug!("Hello world from Rust!");
 
-	panic!();
+	fault!("Hello world!");
 
 	// let mb: *mut MultibootHeader = multiboot_structure_addr as *mut MultibootHeader;
 	// let addr = unsafe { (*mb).framebuffer_addr };
@@ -44,10 +48,9 @@ pub extern "C" fn _start(multiboot2_stack: u32, multiboot_structure_addr: u32) -
 #[no_mangle]
 extern "C" fn eh_personality() {}
 
-
 #[panic_handler]
 #[no_mangle]
-pub extern "C" fn _panic_handler(info: &panic::PanicInfo) -> ! {
+extern "C" fn panic(info: &PanicInfo) -> ! {
 	// debug!("Panic! Message: ", info.message().unwrap().as_str().unwrap());
 	loop {}
 }

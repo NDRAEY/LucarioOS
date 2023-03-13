@@ -16,7 +16,7 @@ endif
 
 all: $(KERNEL)
 
-$(KERNEL): Cargo.toml src/*.rs $(NASM)
+$(KERNEL): Cargo.toml src/*.rs src*/*.rs $(NASM)
 	@rustup override set nightly
 
 	@cargo rustc $(CARGO_DEBUG) --target $(TARGET) -- \
