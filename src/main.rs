@@ -51,6 +51,7 @@ extern "C" fn eh_personality() {}
 #[panic_handler]
 #[no_mangle]
 extern "C" fn panic(info: &PanicInfo) -> ! {
+	debug!("Panic encountered! ", file!(), " : --");
 	// debug!("Panic! Message: ", info.message().unwrap().as_str().unwrap());
 	loop {}
 }
