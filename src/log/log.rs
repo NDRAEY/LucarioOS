@@ -3,6 +3,15 @@ pub use crate::ports::out8;
 const DEBUG_PORT: u16 = 0x3f8;
 
 #[macro_export]
+macro_rules! debug_str_nonl {
+    ( $( $x:expr ),* ) => {
+        $(
+            crate::log::log::debug_write_string($x);
+        )*
+    }
+}
+
+#[macro_export]
 macro_rules! debug_str {
     ( $( $x:expr ),* ) => {
         $(
@@ -15,9 +24,11 @@ macro_rules! debug_str {
 #[macro_export]
 macro_rules! debug {
     ( $( $message:expr ),* ) => {
+        crate::debug_str_nonl!("[LOG ", file!(), ":", "--", "] ");
         $(
-            debug_str!("[LOG ", file!(), ":", "--", "] ", $message);
+            crate::debug_str_nonl!($message);
         )*
+        crate::log::log::debug_write_string("\n");
     };
 }
 
