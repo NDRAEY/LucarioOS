@@ -14,22 +14,19 @@ mod log;
 
 use multiboot::MultibootHeader;
 
-#[macro_use]
-use crate::log::log::*;
+extern "C" {
+	fn patamon();
+}
 
 #[no_mangle]
 pub extern "C" fn _start(multiboot2_stack: u32, multiboot_structure_addr: u32) -> ! {
 	debug!("Hello world from Rust!");
-
-	fault!("Hello world!");
 
 	let mb: *mut MultibootHeader = multiboot_structure_addr as *mut MultibootHeader;
 	let addr = unsafe { (*mb).framebuffer_addr };
 
 	// let width = unsafe { (*mb).framebuffer_width } as usize;
 	// let height = unsafe { (*mb).framebuffer_height } as usize;
-
-	// panic!();
 
 	// let buffer: &mut [u8] = unsafe { slice::from_raw_parts_mut(addr as *mut u8, width * height * 3) };
 
@@ -40,6 +37,10 @@ pub extern "C" fn _start(multiboot2_stack: u32, multiboot_structure_addr: u32) -
 	// 		buffer[x * 3 + (y * width * 3) + 2] = 255;
 	// 	}
 	// }
+
+	unsafe {
+		patamon();
+	}
 
 	loop {}
 }
