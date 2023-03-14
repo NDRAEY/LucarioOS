@@ -18,6 +18,7 @@ all: $(KERNEL)
 
 $(KERNEL): Cargo.toml src/*.rs src*/*.rs $(NASM)
 	@rustup override set nightly
+	@rustup target add x86_64-unknown-none
 
 	@cargo rustc $(CARGO_DEBUG) --target $(TARGET) -- \
 				--emit=obj \
