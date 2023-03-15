@@ -39,7 +39,7 @@ jobs:
           draft: false
           prerelease: false
 
-      - name: upload windows artifact
+      - name: Upload
         uses: actions/upload-release-asset@v1
         env:
           GITHUB_TOKEN: ${{ github.token }}
