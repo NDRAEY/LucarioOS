@@ -1,0 +1,39 @@
+name: 🤖 [PRIVATE] [v0.3.x] SayoriOS Автоматическая сборка при изменениях в репозитории
+
+on:
+  push:
+    branches: [ "main" ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Step 1 - Software installation
+        run: |
+          sudo apt install build-essential curl xorriso grub-pc-bin mtools llvm lld fasm zip
+
+      - name: Step 1.1 - Rustup.rs
+        run: |
+          curl https://sh.rustup.rs -sSf | sh -s -- --default-toolchain nightly
+
+      - name: Step 2 - Compiling the kernel
+        run: make
+
+      - name: Step 3 - ISO assembly
+        run: make iso
+
+      - name: Step 4 - File Existance Check
+        run: |
+          ls iso/*
+
+      - name: Step 6 - Update to the latest unstable release
+        uses: "marvinpinto/action-automatic-releases@latest"
+        with:
+          repo_token: ${{ secrets.GITHUB_TOKEN }}
+          automatic_release_tag: "latest-unstable"
+          prerelease: true
+          title: "LucarioOS Autobuild"
+          files: |
+            LucarioOS.iso
