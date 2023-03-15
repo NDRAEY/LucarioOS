@@ -21,7 +21,7 @@ use crate::log::log::*;
 pub extern "C" fn _start(multiboot2_stack: u32, multiboot_structure_addr: u32) -> ! {
 	debug!("Hello world from Rust!");
 
-	fault!("Hello world!");
+	// fault!("Hello world!");
 
 	let mb: *mut MultibootHeader = multiboot_structure_addr as *mut MultibootHeader;
 	let addr = unsafe { (*mb).framebuffer_addr };
