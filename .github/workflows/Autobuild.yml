@@ -28,12 +28,15 @@ jobs:
         run: |
           ls isodir/*
 
-      - name: Step 6 - Update to the latest unstable release
-        uses: "marvinpinto/action-automatic-releases@latest"
+      - name: Create Release
+        id: create_release
+        uses: actions/create-release@latest
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          repo_token: ${{ secrets.GITHUB_TOKEN }}
-          automatic_release_tag: "latest-unstable"
-          prerelease: true
-          title: "LucarioOS Autobuild"
+          tag_name: ${{ github.ref }}
+          release_name: Release ${{ github.ref }}
+          draft: false
+          prerelease: false
           files: |
             LucarioOS.iso
