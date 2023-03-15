@@ -26,7 +26,7 @@ jobs:
 
       - name: Step 4 - File Existance Check
         run: |
-          ls iso/*
+          ls isodir/*
 
       - name: Step 6 - Update to the latest unstable release
         uses: "marvinpinto/action-automatic-releases@latest"
