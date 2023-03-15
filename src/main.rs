@@ -26,6 +26,8 @@ pub extern "C" fn _start(multiboot2_stack: u32, multiboot_structure_addr: u32) -
 	let mb: *mut MultibootHeader = multiboot_structure_addr as *mut MultibootHeader;
 	let addr = unsafe { (*mb).framebuffer_addr };
 
+	panic!();
+
 	// let width = unsafe { (*mb).framebuffer_width } as usize;
 	// let height = unsafe { (*mb).framebuffer_height } as usize;
 
@@ -50,7 +52,7 @@ extern "C" fn eh_personality() {}
 
 #[panic_handler]
 #[no_mangle]
-extern "C" fn panic(info: &PanicInfo) -> ! {
+extern "C" fn __panic_handler(info: &PanicInfo) -> ! {
 	debug!("Panic encountered! ", file!(), " : --");
 	// debug!("Panic! Message: ", info.message().unwrap().as_str().unwrap());
 	loop {}
