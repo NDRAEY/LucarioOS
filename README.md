@@ -3,6 +3,7 @@
 ![Rust](https://img.shields.io/badge/rust-%23000000.svg?style=for-the-badge&logo=rust&logoColor=white)
 ![Repo size](https://img.shields.io/github/repo-size/NDRAEY/LucarioOS)
 ![License](https://img.shields.io/github/license/NDRAEY/LucarioOS)
+![Build?](https://img.shields.io/github/actions/workflow/status/NDRAEY/LucarioOS/Autobuild.yml)
 
 <h1 align="center">LucarioOS</h1>
 
