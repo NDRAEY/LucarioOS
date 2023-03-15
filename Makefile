@@ -22,6 +22,7 @@ $(KERNEL): Cargo.toml src/*.rs src*/*.rs $(NASM)
 
 	@cargo rustc $(CARGO_DEBUG) --target $(TARGET) -- \
 				--emit=obj \
+				-O \
 				-C panic=abort \
 				-C default-linker-libraries=false
 
