@@ -38,5 +38,13 @@ jobs:
           release_name: Release ${{ github.ref }}
           draft: false
           prerelease: false
-          files: |
-            LucarioOS.iso
+
+      - name: upload windows artifact
+          uses: actions/upload-release-asset@v1
+          env:
+            GITHUB_TOKEN: ${{ github.token }}
+          with:
+            upload_url: ${{ steps.create_release.outputs.upload_url }}
+            asset_path: ./LucarioOS.iso
+            asset_name: LucarioOS.iso
+            asset_content_type: application/octetstream
