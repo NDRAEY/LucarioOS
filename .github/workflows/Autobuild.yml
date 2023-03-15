@@ -1,4 +1,4 @@
-name: 🤖 [PRIVATE] [v0.3.x] SayoriOS Автоматическая сборка при изменениях в репозитории
+name: Autobuild
 
 on:
   push:
@@ -16,7 +16,7 @@ jobs:
 
       - name: Step 1.1 - Rustup.rs
         run: |
-          curl https://sh.rustup.rs -sSf | sh -s -- --default-toolchain nightly
+          curl https://sh.rustup.rs -sSf | sh -s -- --default-toolchain nightly -y
 
       - name: Step 2 - Compiling the kernel
         run: make
