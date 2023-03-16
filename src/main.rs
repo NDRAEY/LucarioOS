@@ -57,12 +57,14 @@ extern "C" fn __panic_handler(info: &PanicInfo) -> ! {
 }
 
 #[lang = "panic_fmt"]
+#[no_mangle]
 extern "C" fn __panic_fmt(_: ::core::fmt::Arguments, _: &'static str, _: u32) -> ! {
     debug!("panic_fmt() was called!");
     loop {}
 }
 
 #[lang = "panic_impl"]
+#[no_mangle]
 extern "C" fn rust_begin_panic(info: &PanicInfo) -> ! {
     debug!("panic_impl() was called!");
     loop {}
