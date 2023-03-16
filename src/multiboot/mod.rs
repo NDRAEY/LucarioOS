@@ -1,3 +1,4 @@
+#[repr(C)]
 pub struct MultibootHeader {
     pub flags: u32,
     pub mem_lower: u32,
