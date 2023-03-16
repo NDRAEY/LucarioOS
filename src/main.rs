@@ -1,5 +1,6 @@
 #![no_std]
 #![no_main]
+#![no_builtins]
 #![feature(lang_items)]
 #![feature(panic_info_message)]
 
@@ -64,5 +65,5 @@ extern "C" fn __panic_fmt(_: ::core::fmt::Arguments, _: &'static str, _: u32) ->
 #[lang = "panic_impl"]
 extern "C" fn rust_begin_panic(info: &PanicInfo) -> ! {
     debug!("panic_impl() was called!");
-	loop {}
+    loop {}
 }
