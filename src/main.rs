@@ -23,8 +23,6 @@ pub extern "C" fn _start(multiboot2_stack: u32, multiboot_structure_addr: u32) -
 
 	// fault!("Hello world!");
 
-	panic!();
-
 	let mb: *mut MultibootHeader = multiboot_structure_addr as *mut MultibootHeader;
 	let addr = unsafe { (*mb).framebuffer_addr };
 
@@ -58,3 +56,8 @@ extern fn __panic_handler(info: &PanicInfo) -> ! {
 	loop {}
 }
 
+#[lang="panic_fmt"]
+extern fn __panic_fmt(_: ::core::fmt::Arguments, _: &'static str, _: u32) -> ! {
+	debug!("panic_fmt() was called!");
+    loop {}
+}
