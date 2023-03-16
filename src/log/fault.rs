@@ -17,7 +17,7 @@ macro_rules! fault {
 	};
 }
 
-pub fn __fault_kernel(message: &str) -> ! {	
-	debug!("Kernel Fault: ", message);
-	loop {}
+pub fn __fault_kernel(message: &str) -> ! {
+    debug!("Kernel Fault: ", message);
+    loop {}
 }

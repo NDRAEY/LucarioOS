@@ -24,28 +24,28 @@ pub struct MultibootHeader {
     pub vbe_interface_seg: u32,
     pub vbe_interface_off: u32,
     pub vbe_interface_len: u32,
-  
+
     pub framebuffer_addr: u64,
     pub framebuffer_pitch: u32,
     pub framebuffer_width: u32,
     pub framebuffer_height: u32,
     pub framebuffer_bpp: u8,
-    pub framebuffer_type: u8
+    pub framebuffer_type: u8,
 }
 
 #[repr(C)]
 pub struct MultibootModList {
-	mod_start: u32,
-	mod_end: u32,
-	cmdline: u32
+    mod_start: u32,
+    mod_end: u32,
+    cmdline: u32,
 }
 
 #[repr(C)]
 pub struct MemoryMapEntry {
-  	size: u32,
-  	addr_low: u32,
-  	addr_high: u32,
-  	len_low: u32,
-  	len_high: u32,
-  	type_: u32
+    size: u32,
+    addr_low: u32,
+    addr_high: u32,
+    len_low: u32,
+    len_high: u32,
+    type_: u32,
 }
