@@ -33,12 +33,14 @@ pub struct MultibootHeader {
     pub framebuffer_type: u8
 }
 
+#[repr(C)]
 pub struct MultibootModList {
 	mod_start: u32,
 	mod_end: u32,
 	cmdline: u32
 }
 
+#[repr(C)]
 pub struct MemoryMapEntry {
   	size: u32,
   	addr_low: u32,
