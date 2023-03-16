@@ -23,6 +23,8 @@ pub extern "C" fn _start(multiboot2_stack: u32, multiboot_structure_addr: u32) -
 
 	// fault!("Hello world!");
 
+	panic!();
+
 	let mb: *mut MultibootHeader = multiboot_structure_addr as *mut MultibootHeader;
 	let addr = unsafe { (*mb).framebuffer_addr };
 
