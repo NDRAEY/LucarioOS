@@ -1,6 +1,7 @@
 #![no_std]
 #![no_main]
 #![no_builtins]
+
 #![feature(lang_items)]
 #![feature(panic_info_message)]
 
@@ -13,9 +14,6 @@ use core::panic::PanicInfo;
 mod log;
 
 use multiboot::MultibootHeader;
-
-#[macro_use]
-use crate::log::log::*;
 
 #[no_mangle]
 pub extern "C" fn _start(multiboot2_stack: u32, multiboot_structure_addr: u32) -> ! {
@@ -53,19 +51,5 @@ extern "C" fn eh_personality() {}
 extern "C" fn __panic_handler(info: &PanicInfo) -> ! {
     debug!("Panic encountered! ", file!(), " : --");
     // debug!("Panic! Message: ", info.message().unwrap().as_str().unwrap());
-    loop {}
-}
-
-#[lang = "panic_fmt"]
-#[no_mangle]
-extern "C" fn __panic_fmt(_: ::core::fmt::Arguments, _: &'static str, _: u32) -> ! {
-    debug!("panic_fmt() was called!");
-    loop {}
-}
-
-#[lang = "panic_impl"]
-#[no_mangle]
-extern "C" fn rust_begin_panic(info: &PanicInfo) -> ! {
-    debug!("panic_impl() was called!");
     loop {}
 }

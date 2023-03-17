@@ -5,8 +5,10 @@ edition = "2021"
 
 [profile.dev]
 panic = "abort"
+overflow-checks = false
 
 [profile.release]
 panic = "abort"
+overflow-checks = false
 
 [dependencies]
