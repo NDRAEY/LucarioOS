@@ -1,17 +1,21 @@
 include include.mk
 
-TARGET = x86_64-unknown-none
+TARGET = i686.json
 
 KERNEL = LucarioOS.elf
+
+LD = ld.lld-13
 
 DEBUG ?= false
 
 ifeq ($(DEBUG),true)
 	CARGO_DEBUG = 
-	DEPS = target/$(TARGET)/debug/deps/
+	# DEPS = target/$(TARGET)/debug/deps/
+	DEPS = target/i686/debug/deps/
 else
 	CARGO_DEBUG = --release
-	DEPS = target/$(TARGET)/release/deps/
+	# DEPS = target/$(TARGET)/release/deps/
+	DEPS = target/i686/release/deps/
 endif
 
 all: $(KERNEL)
@@ -20,7 +24,7 @@ $(KERNEL): Cargo.toml src/*.rs src*/*.rs $(NASM)
 	@rustup override set nightly
 	@rustup target add x86_64-unknown-none
 
-	@cargo rustc $(CARGO_DEBUG) --target $(TARGET) -- \
+	@cargo rustc $(CARGO_DEBUG) --target $(TARGET) -Zbuild-std -- \
 				--emit=obj \
 				-C panic=abort \
 				-C default-linker-libraries=false
@@ -31,7 +35,7 @@ $(KERNEL): Cargo.toml src/*.rs src*/*.rs $(NASM)
 
 $(NASM): asm/%.o : asm/%.asm
 	@echo -e '\x1b[32mASM  \x1b[0m' $@
-	@$(AS) $< -o $@
+	@$(AS) $< --32 -o $@
 
 iso: $(KERNEL)
 	-mkdir -p isodir/boot/grub
@@ -53,5 +57,6 @@ everything:
 
 clean:
 	-rm $(NASM)
+	-rm $(KERNEL)
 	-rm isodir -rf
 	-rm target -rf

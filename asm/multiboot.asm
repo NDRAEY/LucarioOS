@@ -6,6 +6,7 @@
 .set INIT_MBOOT_HEADER_MAGIC,           0x1BADB002
 .set INIT_MBOOT_HEADER_FLAGS,           ALIGN | MEMINFO | VBE_MODE
 .set INIT_MBOOT_CHECKSUM,               -(INIT_MBOOT_HEADER_MAGIC + INIT_MBOOT_HEADER_FLAGS)
+.set STACK_SIZE, 1024 * 32  # 32 KB
 
 .extern kernel
 
@@ -17,6 +18,12 @@
 .long 0, 0, 0, 0, 0
 .long 0
 .long 800, 600, 32
+
+.section .bss
+	.align 16
+	stack_bottom:
+		.skip STACK_SIZE
+	stack_top:
 
 .section	.text
 .global		_init_early
@@ -37,6 +44,8 @@ _init_early:
 		mov %cr4, %eax
 		or $0x600, %ax
 		mov %eax, %cr4
+
+		mov $stack_top, %esp
 
 		push	%esp
 		push	%ebx

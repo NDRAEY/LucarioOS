@@ -11,4 +11,7 @@ overflow-checks = false
 panic = "abort"
 overflow-checks = false
 
+[build]
+target = "i686.json"
+
 [dependencies]

@@ -3,21 +3,21 @@ use core::arch::asm;
 #[inline]
 pub unsafe fn out8(port: u16, value: u8) {
     unsafe {
-        asm!("out dx, al", in("dx") 0x3f8, in("al") value);
+        asm!("out dx, al", in("dx") port, in("al") value, options(nomem, nostack, preserves_flags));
     }
 }
 
 #[inline]
 pub unsafe fn out16(port: u16, value: u16) {
     unsafe {
-        asm!("out dx, ax", in("dx") 0x3f8, in("ax") value);
+        asm!("out dx, ax", in("dx") port, in("ax") value, options(nomem, nostack, preserves_flags));
     }
 }
 
 #[inline]
 pub unsafe fn out32(port: u16, value: u32) {
     unsafe {
-        asm!("out dx, eax", in("dx") 0x3f8, in("eax") value);
+        asm!("out dx, eax", in("dx") port, in("eax") value, options(nomem, nostack, preserves_flags));
     }
 }
 
@@ -25,7 +25,7 @@ pub unsafe fn out32(port: u16, value: u32) {
 pub unsafe fn in8(port: u16) -> u8 {
     let mut tmp: u8 = 0;
     unsafe {
-        asm!("in dx, al", in("dx") 0x3f8, out("al") tmp);
+        asm!("in al, dx", out("al") tmp, in("dx") port, options(nomem, nostack, preserves_flags));
     }
     tmp
 }
@@ -34,7 +34,7 @@ pub unsafe fn in8(port: u16) -> u8 {
 pub unsafe fn in16(port: u16) -> u16 {
     let mut tmp: u16 = 0;
     unsafe {
-        asm!("in dx, ax", in("dx") 0x3f8, out("ax") tmp);
+        asm!("in ax, dx", out("ax") tmp, in("dx") port, options(nomem, nostack, preserves_flags));
     }
     tmp
 }
@@ -43,7 +43,28 @@ pub unsafe fn in16(port: u16) -> u16 {
 pub unsafe fn in32(port: u16) -> u32 {
     let mut tmp: u32 = 0;
     unsafe {
-        asm!("in dx, eax", in("dx") 0x3f8, out("eax") tmp);
+        asm!("in dx, eax", in("dx") port, out("eax") tmp, options(nomem, nostack, preserves_flags));
     }
     tmp
+}
+
+pub fn com_init(port: u16) -> bool {
+    unsafe {
+        out8(port + 1, 0x00); // Disable all interrupts
+        out8(port + 3, 0x80); // Enable DLAB (set baud rate divisor)
+        out8(port + 0, 0x01); // Set divisor to 1 (lo byte) 115200 / divisor (1) = 115200 baud
+        out8(port + 1, 0x00); //                  (hi byte)
+        out8(port + 3, 0x03); // 8 bits, no parity, one stop bit
+        out8(port + 2, 0xC7); // Enable FIFO, clear them, with 14-byte threshold
+        out8(port + 4, 0x0B); // IRQs enabled, RTS/DSR set
+        out8(port + 4, 0x1E); // Set in loopback mode, test the serial chip
+        out8(port + 0, 0xAE); // Test serial chip (send byte 0xAE and check if serial returns same byte)
+
+        if in8(port + 0) != 0xAE {
+            return false;
+        }
+
+        out8(port + 4, 0x0F);
+    }
+    return true;
 }
