@@ -35,6 +35,10 @@ _init_early:
 		fninit
 		fldcw (__fpu_control_word)
 
+		mov $stack_top, %esp
+
+		push %eax
+
 		# enable SSE
 		mov %cr0, %eax
 		and $~0x04, %al
@@ -45,7 +49,7 @@ _init_early:
 		or $0x600, %ax
 		mov %eax, %cr4
 
-		mov $stack_top, %esp
+		pop %eax
 
 		push	%esp
 		push	%ebx
@@ -53,6 +57,7 @@ _init_early:
 		call	_start
 
 		hlt
+		jmp loop
 
 __fpu_control_word:
 		.word 0x37f

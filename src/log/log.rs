@@ -1,5 +1,8 @@
-use crate::{ports::in8, conv::itoa::itoa_bytes_universal};
 pub use crate::ports::out8;
+use crate::{
+    conv::itoa::{itoa_bytes_universal, itoa_bytes_universal_unsigned},
+    ports::in8,
+};
 
 pub const DEBUG_PORT: u16 = 0x3f8;
 
@@ -25,11 +28,15 @@ macro_rules! debug_str {
 #[macro_export]
 macro_rules! debug {
     ( $( $message:expr ),* ) => {
-        crate::debug_str_nonl!("[LOG ", file!(), ":", "--", "] ");
+        {
+        crate::debug_str_nonl!("[LOG ", file!(), ":");
+        crate::log::log::debug_write_number(line!() as _);
+        crate::debug_str_nonl!("] ");
         $(
             crate::debug_str_nonl!($message);
         )*
         crate::log::log::debug_write_string("\n");
+        }
     };
 }
 
@@ -71,7 +78,28 @@ pub fn debug_write_number(num: isize) {
 #[inline]
 pub fn debug_write_hexadecimal(num: isize) {
     let mut buf: [u8; 33] = [0; 33];
-    let length = itoa_bytes_universal(if num < 0 {-num} else {num}, &mut buf, 16);
+    let length = itoa_bytes_universal(if num < 0 { -num } else { num }, &mut buf, 16);
+    let mut i = 0;
+
+    if num < 0 {
+        debug_write_char(b'-');
+    }
+
+    debug_write_string("0x");
+
+    while i < length {
+        unsafe {
+            debug_write_char(*buf.get(i).unwrap_unchecked());
+        }
+
+        i += 1;
+    }
+}
+
+#[inline]
+pub fn debug_write_hexadecimal_unsigned(num: usize) {
+    let mut buf: [u8; 33] = [0; 33];
+    let length = itoa_bytes_universal_unsigned(num, &mut buf, 16);
     let mut i = 0;
 
     if num < 0 {

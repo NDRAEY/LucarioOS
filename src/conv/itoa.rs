@@ -2,8 +2,8 @@
 pub fn itoa_bytes_universal(num: isize, buf: &mut [u8; 33], num_sys: u8) -> usize {
     let mut _buf: [u8; 33] = [0; 33];
     let alphabet: [u8; 16] = [
-        b'0', b'1', b'2', b'3', b'4', b'5', b'6', b'7', b'8', b'9',
-        b'A', b'B', b'C', b'D', b'E', b'F',
+        b'0', b'1', b'2', b'3', b'4', b'5', b'6', b'7', b'8', b'9', b'A', b'B', b'C', b'D', b'E',
+        b'F',
     ];
 
     let mut n = num;
@@ -25,7 +25,9 @@ pub fn itoa_bytes_universal(num: isize, buf: &mut [u8; 33], num_sys: u8) -> usiz
 
     while n > 0 {
         unsafe {
-            *_buf.get_mut(idx).unwrap_unchecked() = alphabet[(n % num_sys as isize) as usize];
+            *_buf.get_mut(idx).unwrap_unchecked() = *alphabet
+                .get((n % num_sys as isize) as usize)
+                .unwrap_unchecked();
         }
 
         idx += 1;
@@ -50,4 +52,51 @@ pub fn itoa_bytes_universal(num: isize, buf: &mut [u8; 33], num_sys: u8) -> usiz
     }
 
     ridx + if negative { 1 } else { 0 }
+}
+
+pub fn itoa_bytes_universal_unsigned(num: usize, buf: &mut [u8; 33], num_sys: u8) -> usize {
+    let mut _buf: [u8; 33] = [0; 33];
+    let alphabet: [u8; 16] = [
+        b'0', b'1', b'2', b'3', b'4', b'5', b'6', b'7', b'8', b'9', b'A', b'B', b'C', b'D', b'E',
+        b'F',
+    ];
+
+    let mut n = num;
+    let mut idx: usize = 0;
+
+    if n == 0 {
+        unsafe {
+            *buf.get_mut(0).unwrap_unchecked() = b'0';
+            return 1;
+        }
+    }
+
+    while n > 0 {
+        unsafe {
+            *_buf.get_mut(idx).unwrap_unchecked() = *alphabet
+                .get((n % num_sys as usize) as usize)
+                .unwrap_unchecked();
+        }
+
+        idx += 1;
+        n /= num_sys as usize;
+    }
+
+    let mut ridx = idx;
+
+    while idx > 0 {
+        unsafe {
+            *buf.get_mut(idx).unwrap_unchecked() = *_buf.get(ridx - idx).unwrap_unchecked();
+        }
+
+        idx -= 1;
+    }
+
+    ridx += 1;
+
+    unsafe {
+        *buf.get_mut(ridx).unwrap_unchecked() = *_buf.get(0).unwrap_unchecked();
+    }
+
+    ridx
 }

@@ -27,6 +27,7 @@ $(KERNEL): Cargo.toml src/*.rs src*/*.rs $(NASM)
 	@cargo rustc $(CARGO_DEBUG) --target $(TARGET) -Zbuild-std -- \
 				--emit=obj \
 				-C panic=abort \
+				-C overflow-checks=off \
 				-C default-linker-libraries=false
 
 	$(LD) -n $(DEPS)/*.o $(NASM) \
