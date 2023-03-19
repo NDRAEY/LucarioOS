@@ -54,17 +54,27 @@ pub unsafe extern "C" fn _start(multiboot_addr: u32, stack_top: u32) -> ! {
         bpp: fb_bpp,
     };
 
-    for y in 0..height {
-        for x in 0..width {
-            canvas.pixel(
-                x,
-                y,
-                0x0c1fd8
-            );
-        }
-    }
+    let mut i: usize = 0;
+
+	loop {		
+	    for y in 0..height {
+	        for x in 0..width {
+	            canvas.pixel(
+	                x,
+	                y,
+	                draw_fn(x, y, i) as u32
+	            );
+	        }
+	    }
+
+	    i += 1;
+	}
 
     loop {}
+}
+
+fn draw_fn(x: usize, y: usize, i: usize) -> usize {
+	x.wrapping_div(y)
 }
 
 #[no_mangle]

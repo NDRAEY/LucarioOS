@@ -20,7 +20,7 @@ endif
 
 all: $(KERNEL)
 
-$(KERNEL): Cargo.toml src/*.rs src*/*.rs $(NASM)
+$(KERNEL): Cargo.toml src/*.rs src/*/*.rs $(C_OBJS) $(NASM)
 	@rustup override set nightly
 	@rustup target add x86_64-unknown-none
 
@@ -30,13 +30,17 @@ $(KERNEL): Cargo.toml src/*.rs src*/*.rs $(NASM)
 				-C overflow-checks=off \
 				-C default-linker-libraries=false
 
-	$(LD) -n $(DEPS)/*.o $(NASM) \
+	$(LD) -n $(DEPS)/*.o $(NASM) $(C_OBJS) \
 		-T src/link.ld \
 		-o $(KERNEL)
 
 $(NASM): asm/%.o : asm/%.asm
 	@echo -e '\x1b[32mASM  \x1b[0m' $@
 	@$(AS) $< --32 -o $@
+
+$(C_OBJS): c/%.o : c/%.c
+	@echo -e '\x1b[32mC  \x1b[0m' $@
+	@$(CC) $< -ffreestanding -mno-sse -mno-avx -nostdlib -fno-builtin -fno-stack-protector -m32 -c -o $@
 
 iso: $(KERNEL)
 	-mkdir -p isodir/boot/grub
@@ -59,5 +63,6 @@ everything:
 clean:
 	-rm $(NASM)
 	-rm $(KERNEL)
+	-rm $(C_OBJS)
 	-rm isodir -rf
 	-rm target -rf

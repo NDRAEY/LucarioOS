@@ -64,3 +64,9 @@ __fpu_control_word:
 
 loop:
 		jmp	loop
+
+.extern __panic_handler_c
+
+.global _ZN4core9panicking5panic17h89e640e2ae417adbE
+_ZN4core9panicking5panic17h89e640e2ae417adbE:
+	jmp __panic_handler_c
