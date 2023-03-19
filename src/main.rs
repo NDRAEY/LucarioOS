@@ -17,7 +17,6 @@ use multiboot::MultibootHeader;
 
 use crate::{display::real_canvas::Canvas, log::log::DEBUG_PORT, ports::com_init};
 
-
 #[no_mangle]
 #[allow(arithmetic_overflow)]
 pub unsafe extern "C" fn _start(multiboot_addr: u32, stack_top: u32) -> ! {
@@ -56,25 +55,25 @@ pub unsafe extern "C" fn _start(multiboot_addr: u32, stack_top: u32) -> ! {
 
     let mut i: usize = 0;
 
-	loop {		
-	    for y in 0..height {
-	        for x in 0..width {
-	            canvas.pixel(
-	                x,
-	                y,
-	                draw_fn(x, y, i) as u32
-	            );
-	        }
-	    }
+    loop {
+        for y in 0..height {
+            for x in 0..width {
+                canvas.pixel(x, y, draw_fn(x, y, i) as u32);
+            }
+        }
 
-	    i += 1;
-	}
+        i += 1;
+    }
 
     loop {}
 }
 
+fn abs(n: isize) -> usize {
+    if n >= 0 { n as usize } else { (-n) as usize }
+}
+
 fn draw_fn(x: usize, y: usize, i: usize) -> usize {
-	x.wrapping_div(y)
+    (abs(255 - (i & 511) as isize) << 16) | (abs(255 - (i & 511) as isize) << 8) | (abs(255 - (i & 511) as isize))
 }
 
 #[no_mangle]
