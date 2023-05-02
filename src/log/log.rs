@@ -78,7 +78,12 @@ pub fn debug_write_number(num: isize) {
 #[inline]
 pub fn debug_write_hexadecimal(num: isize) {
     let mut buf: [u8; 33] = [0; 33];
-    let length = itoa_bytes_universal(if num < 0 { -num } else { num }, &mut buf, 16);
+    let length = itoa_bytes_universal(
+        num.abs(),
+        &mut buf,
+        16
+    );
+
     let mut i = 0;
 
     if num < 0 {
@@ -107,6 +112,27 @@ pub fn debug_write_hexadecimal_unsigned(num: usize) {
     }
 
     debug_write_string("0x");
+
+    while i < length {
+        unsafe {
+            debug_write_char(*buf.get(i).unwrap_unchecked());
+        }
+
+        i += 1;
+    }
+}
+
+#[inline]
+pub fn debug_write_binary(num: usize) {
+    let mut buf: [u8; 33] = [0; 33];
+    let length = itoa_bytes_universal_unsigned(num, &mut buf, 2);
+    let mut i = 0;
+
+    if num < 0 {
+        debug_write_char(b'-');
+    }
+
+    debug_write_string("0b");
 
     while i < length {
         unsafe {

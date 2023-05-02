@@ -15,11 +15,11 @@ use core::panic::PanicInfo;
 
 use multiboot::MultibootHeader;
 
-use crate::{display::real_canvas::Canvas, log::log::DEBUG_PORT, ports::com_init};
+use crate::{display::{real_canvas::Canvas, console::TTY}, log::log::DEBUG_PORT, ports::com_init};
 
 #[no_mangle]
 #[allow(arithmetic_overflow)]
-pub unsafe extern "C" fn _start(multiboot_addr: u32, stack_top: u32) -> ! {
+pub unsafe extern "C" fn _start(multiboot_addr: u32, _stack_top: u32) -> ! {
     com_init(DEBUG_PORT);
 
     debug!("Hello world from Rust!");
@@ -53,47 +53,16 @@ pub unsafe extern "C" fn _start(multiboot_addr: u32, stack_top: u32) -> ! {
         bpp: fb_bpp,
     };
 
-    let mut i: usize = 0;
+    let mut console = TTY {
+        canvas,
+        x: 0,
+        y: 0,
+        color: 0xffffff
+    };
 
-    loop {
-        for y in 0..height {
-            for x in 0..width {
-                canvas.pixel(x, y, draw_fn(x, y, i) as u32);
-            }
-        }
-
-        i += 1;
-    }
+    console.puts("Hyvaa yota, Valery Artemovich!");
 
     loop {}
-}
-
-fn abs(n: isize) -> usize {
-    if n >= 0 { n as usize } else { (-n) as usize }
-}
-
-fn draw_fn(x: usize, y: usize, i: usize) -> usize {
-    (abs(255 - (i & 511) as isize) << 16) | (abs(255 - (i & 511) as isize) << 8) | (abs(255 - (i & 511) as isize))
-}
-
-#[no_mangle]
-pub unsafe extern "C" fn memset(pointer: *mut u8, value: u8, count: usize) {
-    let mut c = count;
-
-    while c > 0 {
-        *pointer.offset(c as isize).as_mut().unwrap_unchecked() = value;
-        c -= 1;
-    }
-}
-
-#[no_mangle]
-pub unsafe extern "C" fn memcpy(destination: *mut u8, source: *const u8, count: usize) {
-    let mut c = count;
-
-    while c > 0 {
-        *destination.offset(c as isize).as_mut().unwrap_unchecked() = *source.offset(c as isize);
-        c -= 1;
-    }
 }
 
 #[lang = "eh_personality"]
