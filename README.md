@@ -9,8 +9,10 @@
 
 An attempt to write an OS from scratch using Rust and Assembly.
 
-Now, It only prints "Hello from Rust!" to the COM1 port.
-
+This OS can:
+- Print to COM1 port.
+- Draw on screen.
+- Use internal fonts to draw text on the screen.
 
 To build LucarioOS:
 1. Clone this repository to your machine.
