@@ -22,6 +22,7 @@ all: $(KERNEL)
 
 $(KERNEL): Cargo.toml src/*.rs src/*/*.rs $(C_OBJS) $(NASM)
 	@rustup override set nightly
+	rustup component add rust-src --toolchain nightly-x86_64-unknown-linux-gnu
 	@rustup target add x86_64-unknown-none
 
 	@cargo rustc $(CARGO_DEBUG) --target $(TARGET) -Zbuild-std -- \
