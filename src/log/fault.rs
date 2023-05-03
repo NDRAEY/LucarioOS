@@ -1,4 +1,5 @@
 use crate::{debug, debug_str, log::log::debug_write_string};
+use crate::log::log::DebugWrite;
 
 #[macro_export]
 macro_rules! fault {

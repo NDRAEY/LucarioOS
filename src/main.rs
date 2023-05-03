@@ -15,14 +15,15 @@ use core::panic::PanicInfo;
 
 use multiboot::MultibootHeader;
 
-use crate::{display::{real_canvas::Canvas, console::TTY}, log::log::DEBUG_PORT, ports::com_init};
+use crate::{display::{real_canvas::Canvas, console::TTY}, log::log::*, ports::com_init};
+use crate::conv::fmt::Hexadecimal;
 
 #[no_mangle]
 #[allow(arithmetic_overflow)]
 pub unsafe extern "C" fn _start(multiboot_addr: u32, _stack_top: u32) -> ! {
     com_init(DEBUG_PORT);
 
-    debug!("Hello world from Rust!");
+    debug!("Hello world from Rust!", 12345);
 
     let mb: *const MultibootHeader = multiboot_addr as *const MultibootHeader;
     let addr = (*mb).framebuffer_addr as usize;
@@ -33,18 +34,10 @@ pub unsafe extern "C" fn _start(multiboot_addr: u32, _stack_top: u32) -> ! {
     let fb_pitch = unsafe { (*mb).framebuffer_pitch } as usize;
     let height = unsafe { (*mb).framebuffer_height } as usize;
 
-    log::log::debug_write_string("Screen address: ");
-    log::log::debug_write_hexadecimal_unsigned(addr as _);
-    log::log::debug_write_char(b'\n');
-
-    log::log::debug_write_string("Screen width: ");
-    log::log::debug_write_number(width as _);
-    log::log::debug_write_char(b'\n');
-
-    log::log::debug_write_string("Screen height: ");
-    log::log::debug_write_number(height as _);
-    log::log::debug_write_char(b'\n');
-
+    debug!("Screen address:", Hexadecimal::Unsigned(addr));
+    debug!("Screen width:", width);
+    debug!("Screen height:", height);
+    
     let canvas = Canvas {
         buffer: addr as *mut u8,
         width,
@@ -60,7 +53,8 @@ pub unsafe extern "C" fn _start(multiboot_addr: u32, _stack_top: u32) -> ! {
         color: 0xffffff
     };
 
-    console.puts("Hyvaa yota, Valery Artemovich!");
+    console.puts("Hyvaa yota, Valery Artemovich!\n");
+    console.puts("0_0 I made a console?\n");
 
     loop {}
 }
@@ -72,7 +66,7 @@ extern "C" fn __eh_personality() {}
 #[panic_handler]
 #[no_mangle]
 extern "C" fn __panic_handler(info: &PanicInfo) -> ! {
-    debug!("Panic encountered! ", file!(), " : --");
+    // debug!("Panic encountered! ", file!(), " : --");
     // debug!("Panic! Message: ", info.message().unwrap().as_str().unwrap());
     loop {}
 }

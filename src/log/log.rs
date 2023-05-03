@@ -1,10 +1,43 @@
 pub use crate::ports::out8;
 use crate::{
     conv::itoa::{itoa_bytes_universal, itoa_bytes_universal_unsigned},
+    conv::fmt::Hexadecimal,
     ports::in8,
 };
 
 pub const DEBUG_PORT: u16 = 0x3f8;
+
+pub trait DebugWrite {
+    fn debug_write(&self);
+}
+
+impl DebugWrite for usize {
+    fn debug_write(&self) {
+        debug_write_number(*self as isize);
+    }
+}
+
+impl DebugWrite for &str {
+    fn debug_write(&self) {
+        debug_write_string(*self);
+    }
+}
+
+impl DebugWrite for char {
+    fn debug_write(&self) {
+        debug_write_char(*self as u8);
+    }
+}
+
+impl DebugWrite for Hexadecimal {
+    fn debug_write(&self) {
+        match *self {
+            Hexadecimal::Signed(v) => debug_write_hexadecimal(v),
+            Hexadecimal::Unsigned(v) => debug_write_hexadecimal_unsigned(v),
+        };
+    }
+}
+
 
 #[macro_export]
 macro_rules! debug_str_nonl {
@@ -31,9 +64,10 @@ macro_rules! debug {
         {
         crate::debug_str_nonl!("[LOG ", file!(), ":");
         crate::log::log::debug_write_number(line!() as _);
-        crate::debug_str_nonl!("] ");
+        crate::debug_str_nonl!("]");
         $(
-            crate::debug_str_nonl!($message);
+            " ".debug_write();
+            $message.debug_write();
         )*
         crate::log::log::debug_write_string("\n");
         }
