@@ -14,6 +14,8 @@ This OS can:
 - Draw on screen.
 - Use internal fonts to draw text on the screen.
 
+```curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh```
+
 To build LucarioOS:
 1. Clone this repository to your machine.
 2. Enter the `LucarioOS` directory.

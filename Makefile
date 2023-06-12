@@ -6,6 +6,9 @@ KERNEL = LucarioOS.elf
 
 LD = ld.lld-13
 
+RUSTUP = ~/.cargo/bin/rustup
+CARGO = ~/.cargo/bin/cargo
+
 DEBUG ?= false
 
 ifeq ($(DEBUG),true)
@@ -21,11 +24,11 @@ endif
 all: $(KERNEL)
 
 $(KERNEL): Cargo.toml src/*.rs src/*/*.rs $(C_OBJS) $(NASM)
-	@rustup override set nightly
-	rustup component add rust-src --toolchain nightly-x86_64-unknown-linux-gnu
-	@rustup target add x86_64-unknown-none
+	@$(RUSTUP) override set nightly
+	$(RUSTUP) component add rust-src --toolchain nightly-x86_64-unknown-linux-gnu
+	@$(RUSTUP) target add x86_64-unknown-none
 
-	@cargo rustc $(CARGO_DEBUG) --target $(TARGET) -Zbuild-std -- \
+	@$(CARGO) rustc $(CARGO_DEBUG) --target $(TARGET) -Zbuild-std -- \
 				--emit=obj \
 				-C panic=abort \
 				-C overflow-checks=off \

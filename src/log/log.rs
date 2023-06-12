@@ -162,10 +162,6 @@ pub fn debug_write_binary(num: usize) {
     let length = itoa_bytes_universal_unsigned(num, &mut buf, 2);
     let mut i = 0;
 
-    if num < 0 {
-        debug_write_char(b'-');
-    }
-
     debug_write_string("0b");
 
     while i < length {
