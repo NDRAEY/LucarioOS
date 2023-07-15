@@ -1,3 +1,6 @@
+use crate::{multiboot::MultibootHeader, debug, conv::fmt::Hexadecimal};
+use crate::log::log::DebugWrite;
+
 pub struct Canvas {
     pub buffer: *mut u8,
     pub width: usize,
@@ -26,5 +29,15 @@ impl Canvas {
     #[inline]
     fn pixel_pos(&self, x: usize, y: usize) -> usize {
         x * (self.bpp / 8) + y * self.pitch
+    }
+
+    pub unsafe fn from_multiboot(mb: *const MultibootHeader) -> Self {
+        Self {
+            buffer: (*mb).addr as *mut u8,
+            width: (*mb).framebuffer_width as usize,
+            height: (*mb).framebuffer_height as usize,
+            pitch: (*mb).framebuffer_pitch as usize,
+            bpp: (*mb).framebuffer_bpp as usize,
+        }
     }
 }

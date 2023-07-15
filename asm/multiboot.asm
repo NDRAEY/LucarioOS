@@ -54,6 +54,7 @@ _init_early:
 		push	%esp
 		push	%ebx
 
+		xor %ebp, %ebp
 		call	_start
 
 		hlt

@@ -28,11 +28,10 @@ pub unsafe extern "C" fn _start(multiboot_addr: u32, _stack_top: u32) -> ! {
     let mb: *const MultibootHeader = multiboot_addr as *const MultibootHeader;
     let addr = (*mb).framebuffer_addr as usize;
 
-    let width = unsafe { (*mb).framebuffer_width } as usize;
-    let height = unsafe { (*mb).framebuffer_height } as usize;
-    let fb_bpp = unsafe { (*mb).framebuffer_bpp } as usize;
-    let fb_pitch = unsafe { (*mb).framebuffer_pitch } as usize;
-    let height = unsafe { (*mb).framebuffer_height } as usize;
+    let width = (*mb).framebuffer_width as usize;
+    let height = (*mb).framebuffer_height as usize;
+    let fb_bpp = (*mb).framebuffer_bpp as usize;
+    let fb_pitch = (*mb).framebuffer_pitch as usize;
 
     debug!("Screen address:", Hexadecimal::Unsigned(addr));
     debug!("Screen width:", width);
@@ -45,6 +44,10 @@ pub unsafe extern "C" fn _start(multiboot_addr: u32, _stack_top: u32) -> ! {
         pitch: fb_pitch,
         bpp: fb_bpp,
     };
+
+    // let canvas = Canvas::from_multiboot(mb);  // Needs memory?
+
+    canvas.pixel(40, 50, 0xff0000);
 
     let mut console = TTY {
         canvas,
