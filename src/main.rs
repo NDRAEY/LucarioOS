@@ -68,7 +68,7 @@ extern "C" fn __eh_personality() {}
 
 #[panic_handler]
 #[no_mangle]
-extern "C" fn __panic_handler(info: &PanicInfo) -> ! {
+extern "Rust" fn __panic_handler(info: &PanicInfo) -> ! {
     // debug!("Panic encountered! ", file!(), " : --");
     // debug!("Panic! Message: ", info.message().unwrap().as_str().unwrap());
     loop {}

@@ -4,10 +4,10 @@ TARGET = i686.json
 
 KERNEL = LucarioOS.elf
 
-LD = ld.lld-13
+LD = ld.lld
 
-RUSTUP = ~/.cargo/bin/rustup
-CARGO = ~/.cargo/bin/cargo
+RUSTUP = rustup
+CARGO = cargo
 
 DEBUG ?= false
 
@@ -23,9 +23,11 @@ endif
 
 all: $(KERNEL)
 
+TOOLCHAIN = nightly-2023-04-11
+
 $(KERNEL): Cargo.toml src/*.rs src/*/*.rs $(C_OBJS) $(NASM)
-	@$(RUSTUP) override set nightly
-	$(RUSTUP) component add rust-src --toolchain nightly-x86_64-unknown-linux-gnu
+	@$(RUSTUP) override set $(TOOLCHAIN)
+	rustup component add rust-src --toolchain $(TOOLCHAIN)
 	@$(RUSTUP) target add x86_64-unknown-none
 
 	@$(CARGO) rustc $(CARGO_DEBUG) --target $(TARGET) -Zbuild-std -- \
