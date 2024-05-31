@@ -1,2 +1,6 @@
 [unstable]
 bindeps = true
+
+[toolchain]
+channel = "nightly"
+version = "2023-04-01"

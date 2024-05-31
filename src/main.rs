@@ -59,6 +59,8 @@ pub unsafe extern "C" fn _start(multiboot_addr: u32, _stack_top: u32) -> ! {
     console.puts("Hyvaa yota, Valery Artemovich!\n");
     console.puts("0_0 I made a console?\n");
 
+	// panic!("WHAT?");
+
     loop {}
 }
 

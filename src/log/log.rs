@@ -141,10 +141,6 @@ pub fn debug_write_hexadecimal_unsigned(num: usize) {
     let length = itoa_bytes_universal_unsigned(num, &mut buf, 16);
     let mut i = 0;
 
-    if num < 0 {
-        debug_write_char(b'-');
-    }
-
     debug_write_string("0x");
 
     while i < length {
