@@ -47,17 +47,20 @@ pub unsafe extern "C" fn _start(multiboot_addr: u32, _stack_top: u32) -> ! {
 
     // let canvas = Canvas::from_multiboot(mb);  // Needs memory?
 
-    canvas.pixel(40, 50, 0xff0000);
 
-    let mut console = TTY {
+    /*let mut console = TTY {
         canvas,
         x: 0,
         y: 0,
         color: 0xffffff
-    };
+    };*/
+
+    let mut console = TTY::new(&canvas);
 
     console.puts("Hyvaa yota, Valery Artemovich!\n");
     console.puts("0_0 I made a console?\n");
+    
+    canvas.pixel(40, 50, 0xff0000);
 
 	// panic!("WHAT?");
 

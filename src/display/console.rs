@@ -1,13 +1,22 @@
 use crate::{Canvas, log::log};
 
-pub struct TTY {
-    pub canvas: Canvas,
+pub struct TTY<'a> {
+    pub canvas: &'a Canvas,
     pub x: usize,
     pub y: usize,
     pub color: usize
 }
 
-impl TTY {
+impl TTY<'_> {
+    pub fn new(canvas: &Canvas) -> TTY<'_> {
+        TTY {
+            canvas,
+            x: 0,
+            y: 0,
+            color: 0xffffff,
+        }
+    }
+
     pub fn putchar(&mut self, character: u8) {
         if character == '\n' as u8 {
             self.y += crate::display::font::FONT_HEIGHT as usize;
