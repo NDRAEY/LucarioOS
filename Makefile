@@ -26,7 +26,7 @@ all: $(KERNEL)
 TOOLCHAIN = nightly-2023-04-11
 
 $(KERNEL): Cargo.toml src/*.rs src/*/*.rs $(C_OBJS) $(NASM)
-	# @$(RUSTUP) override set $(TOOLCHAIN)
+	@$(RUSTUP) override set $(TOOLCHAIN)
 	rustup component add rust-src --toolchain $(TOOLCHAIN)
 	@$(RUSTUP) target add x86_64-unknown-none
 
