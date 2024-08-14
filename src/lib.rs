@@ -48,8 +48,8 @@ pub unsafe extern "C" fn _start(multiboot_addr: u32, _stack_top: u32) -> ! {
 
     debug!("Creating memory manager");
 
-    //let mut memory_manager = mem::physical::PhysicalMemoryManager::new(&mb);
-    //memory_manager.init((mb.mods_addr  + 0xC000_0000) as *const MultibootModList, mb.mods_count as usize);
+    let mut memory_manager = mem::physical::PhysicalMemoryManager::new(&mb);
+    memory_manager.init((mb.mods_addr  + 0xC000_0000) as *const MultibootModList, mb.mods_count as usize);
 
     /*debug!("Found", memory_manager.available());
 
