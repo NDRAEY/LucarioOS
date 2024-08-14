@@ -1,5 +1,5 @@
-use crate::{multiboot::MultibootHeader, debug, conv::fmt::Hexadecimal};
 use crate::log::log::DebugWrite;
+use crate::{conv::fmt::Hexadecimal, debug, multiboot::MultibootHeader};
 
 pub struct Canvas {
     pub buffer: *mut u8,
@@ -11,7 +11,6 @@ pub struct Canvas {
 
 impl Canvas {
     #[inline]
-    #[allow(arithmetic_overflow)]
     pub fn pixel(&self, x: usize, y: usize, color: u32) {
         if x >= self.width && y >= self.height {
             return;
@@ -31,13 +30,13 @@ impl Canvas {
         x * (self.bpp / 8) + y * self.pitch
     }
 
-    pub unsafe fn from_multiboot(mb: *const MultibootHeader) -> Self {
+    pub unsafe fn from_multiboot(mb: MultibootHeader) -> Self {
         Self {
-            buffer: (*mb).addr as *mut u8,
-            width: (*mb).framebuffer_width as usize,
-            height: (*mb).framebuffer_height as usize,
-            pitch: (*mb).framebuffer_pitch as usize,
-            bpp: (*mb).framebuffer_bpp as usize,
+            buffer: mb.framebuffer_addr as *mut u8,
+            width: mb.framebuffer_width as usize,
+            height: mb.framebuffer_height as usize,
+            pitch: mb.framebuffer_pitch as usize,
+            bpp: mb.framebuffer_bpp as usize,
         }
     }
 }

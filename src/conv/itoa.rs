@@ -95,7 +95,7 @@ pub fn itoa_bytes_universal_unsigned(num: usize, buf: &mut [u8; 33], num_sys: u8
     ridx += 1;
 
     unsafe {
-        *buf.get_mut(ridx).unwrap_unchecked() = *_buf.get(0).unwrap_unchecked();
+        *buf.get_mut(ridx).unwrap() = *_buf.get(0).unwrap_unchecked();
     }
 
     ridx

@@ -1,30 +1,39 @@
-ENTRY(_init_early)
+ENTRY(_init_early);
 
-SECTIONS
-{
-    . = 0x00200000;
-    KERNEL_BASE_pos = .;
+SECTIONS {
+    . = 0x100000;
 
-    .text ALIGN (0x1000) :
-    {
-        *(.boot)
-        *(.text)
+    KERNEL_PHYS_START = .;
+    KERNEL_VIRT_START = . + 0xC0000000;
+
+    .multiboot : {
+        *(.multiboot*)
     }
 
-    .data ALIGN (0x1000) :
-    {
-        *(.data)
+    . += 0xC0000000;
+
+    .text ALIGN(0x1000) : AT(ADDR (.text) - 0xC0000000) {
+        *(.text*)
     }
 
-    .bss :
-    {
+    .data ALIGN(0x1000) : AT(ADDR (.data) - 0xC0000000) {
+        *(.data*)
+    }
+
+    .rodata ALIGN(0x1000) : AT(ADDR (.rodata) - 0xC0000000) {
+        *(.rodata*)
+    }
+
+    .bss ALIGN(0x1000) : AT(ADDR (.bss) - 0xC0000000) {
         *(COMMON)
-        *(.bss)
+        *(.bss.*)
+		/**(.bootstrap_stack)*/
     }
 
-	/DISCARD/ : {
-		*(.note.gnu.build-id)
-	}
+    .bootstrap_stack ALIGN(0x1000) : AT(ADDR(.bootstrap_stack) - 0xC0000000) {
+        *(.bootstrap_stack)
+    }
 
-    KERNEL_END_pos = .;
+    KERNEL_PHYS_END = . - 0xC0000000;
+    KERNEL_VIRT_END = .;
 }

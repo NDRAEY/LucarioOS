@@ -1,10 +1,10 @@
-use crate::{Canvas, log::log};
+use crate::{log::log, Canvas};
 
 pub struct TTY<'a> {
     pub canvas: &'a Canvas,
     pub x: usize,
     pub y: usize,
-    pub color: usize
+    pub color: usize,
 }
 
 impl TTY<'_> {
@@ -42,7 +42,8 @@ impl TTY<'_> {
 
             for x in 0..crate::display::font::FONT_WIDTH {
                 if (line >> x) & 1 == 1 {
-                    self.canvas.pixel(self.x + x as usize, self.y + y as usize, self.color as u32);
+                    self.canvas
+                        .pixel(self.x + x as usize, self.y + y as usize, self.color as u32);
                 }
             }
         }

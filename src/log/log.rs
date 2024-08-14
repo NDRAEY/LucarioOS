@@ -1,7 +1,7 @@
 pub use crate::ports::out8;
 use crate::{
-    conv::itoa::{itoa_bytes_universal, itoa_bytes_universal_unsigned},
     conv::fmt::Hexadecimal,
+    conv::itoa::{itoa_bytes_universal, itoa_bytes_universal_unsigned},
     ports::in8,
 };
 
@@ -12,6 +12,18 @@ pub trait DebugWrite {
 }
 
 impl DebugWrite for usize {
+    fn debug_write(&self) {
+        debug_write_number(*self as isize);
+    }
+}
+
+impl DebugWrite for u32 {
+    fn debug_write(&self) {
+        debug_write_number(*self as isize);
+    }
+}
+
+impl DebugWrite for i32 {
     fn debug_write(&self) {
         debug_write_number(*self as isize);
     }
@@ -37,7 +49,6 @@ impl DebugWrite for Hexadecimal {
         };
     }
 }
-
 
 #[macro_export]
 macro_rules! debug_str_nonl {
@@ -77,7 +88,9 @@ macro_rules! debug {
 #[inline]
 pub fn debug_write_char(chr: u8) {
     unsafe {
-        while com_port_busy(DEBUG_PORT) {}
+        while com_port_busy(DEBUG_PORT) {
+            core::arch::asm!("nop");
+        }
         out8(DEBUG_PORT, chr);
     }
 }
@@ -98,25 +111,16 @@ pub fn debug_write_string(strng: &str) {
 pub fn debug_write_number(num: isize) {
     let mut buf: [u8; 33] = [0; 33];
     let length = itoa_bytes_universal(num, &mut buf, 10);
-    let mut i = 0;
 
-    while i < length {
-        unsafe {
-            debug_write_char(*buf.get(i).unwrap_unchecked());
-        }
-
-        i += 1;
+    for i in 0..length {
+        debug_write_char(buf[i]);
     }
 }
 
 #[inline]
 pub fn debug_write_hexadecimal(num: isize) {
     let mut buf: [u8; 33] = [0; 33];
-    let length = itoa_bytes_universal(
-        num.abs(),
-        &mut buf,
-        16
-    );
+    let length = itoa_bytes_universal(num.abs(), &mut buf, 16);
 
     let mut i = 0;
 

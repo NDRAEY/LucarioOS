@@ -9,7 +9,7 @@ LD = ld.lld
 RUSTUP = rustup
 CARGO = cargo
 
-DEBUG ?= false
+DEBUG ?= true
 
 ifeq ($(DEBUG),true)
 	CARGO_DEBUG = 
@@ -25,22 +25,23 @@ all: $(KERNEL)
 
 TOOLCHAIN = nightly-2023-04-11
 
-$(KERNEL): Cargo.toml src/*.rs src/*/*.rs $(C_OBJS) $(NASM)
+$(KERNEL): Cargo.toml src/*.rs src/*/*.rs $(C_OBJS) $(ASM)
 	@$(RUSTUP) override set $(TOOLCHAIN)
 	rustup component add rust-src --toolchain $(TOOLCHAIN)
 	@$(RUSTUP) target add x86_64-unknown-none
 
-	@$(CARGO) rustc $(CARGO_DEBUG) --target $(TARGET) -Zbuild-std -- \
+	$(CARGO) rustc $(CARGO_DEBUG) --target $(TARGET) -Zbuild-std -- \
 				--emit=obj \
 				-C panic=abort \
 				-C overflow-checks=off \
-				-C default-linker-libraries=false
+				-C default-linker-libraries=false \
+				-C link-args='-Tsrc/link.ld'
 
-	$(LD) -n $(DEPS)/*.o $(NASM) $(C_OBJS) \
+	$(LD) -n $(DEPS)/*.o $(DEPS)/*.rlib $(ASM) $(C_OBJS) \
 		-T src/link.ld \
 		-o $(KERNEL)
 
-$(NASM): asm/%.o : asm/%.asm
+$(ASM): asm/%.o : asm/%.S
 	@echo -e '\x1b[32mASM  \x1b[0m' $@
 	@$(AS) $< --32 -o $@
 
@@ -56,7 +57,7 @@ iso: $(KERNEL)
 	grub-mkrescue isodir/ -o LucarioOS.iso -V LucarioOS
 
 run:
-	qemu-system-x86_64 -enable-kvm -m 16M -serial mon:stdio -cdrom LucarioOS.iso
+	qemu-system-x86_64 -d int,guest_errors -m 32M -serial mon:stdio -cdrom LucarioOS.iso -no-reboot
 
 runiso:
 	$(MAKE) iso
@@ -67,7 +68,7 @@ everything:
 	$(MAKE) runiso
 
 clean:
-	-rm $(NASM)
+	-rm $(ASM)
 	-rm $(KERNEL)
 	-rm $(C_OBJS)
 	-rm isodir -rf

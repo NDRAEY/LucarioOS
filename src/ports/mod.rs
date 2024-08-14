@@ -1,32 +1,24 @@
 use core::arch::asm;
 
-#[inline]
+#[inline(always)]
 pub unsafe fn out8(port: u16, value: u8) {
-    unsafe {
-        asm!("out dx, al", in("dx") port, in("al") value, options(nomem, nostack, preserves_flags));
-    }
+    asm!("out dx, al", in("dx") port, in("al") value, options(nomem, nostack, preserves_flags));
 }
 
 #[inline]
 pub unsafe fn out16(port: u16, value: u16) {
-    unsafe {
-        asm!("out dx, ax", in("dx") port, in("ax") value, options(nomem, nostack, preserves_flags));
-    }
+    asm!("out dx, ax", in("dx") port, in("ax") value, options(nomem, nostack, preserves_flags));
 }
 
 #[inline]
 pub unsafe fn out32(port: u16, value: u32) {
-    unsafe {
-        asm!("out dx, eax", in("dx") port, in("eax") value, options(nomem, nostack, preserves_flags));
-    }
+    asm!("out dx, eax", in("dx") port, in("eax") value, options(nomem, nostack, preserves_flags));
 }
 
-#[inline]
+#[inline(always)]
 pub unsafe fn in8(port: u16) -> u8 {
     let mut tmp: u8 = 0;
-    unsafe {
-        asm!("in al, dx", out("al") tmp, in("dx") port, options(nomem, nostack, preserves_flags));
-    }
+    asm!("in al, dx", out("al") tmp, in("dx") port, options(nomem, nostack, preserves_flags));
     tmp
 }
 

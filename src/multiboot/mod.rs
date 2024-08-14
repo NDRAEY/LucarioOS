@@ -1,4 +1,5 @@
 #[repr(C)]
+#[derive(Copy, Clone)]
 pub struct MultibootHeader {
     pub flags: u32,
     pub mem_lower: u32,
@@ -35,17 +36,17 @@ pub struct MultibootHeader {
 
 #[repr(C)]
 pub struct MultibootModList {
-    mod_start: u32,
-    mod_end: u32,
-    cmdline: u32,
+    pub mod_start: u32,
+    pub mod_end: u32,
+    pub cmdline: u32,
 }
 
 #[repr(C)]
 pub struct MemoryMapEntry {
-    size: u32,
-    addr_low: u32,
+    pub size: u32,
+    pub addr_low: u32,
     addr_high: u32,
-    len_low: u32,
+    pub len_low: u32,
     len_high: u32,
-    type_: u32,
+    pub type_: u32,
 }
