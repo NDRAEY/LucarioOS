@@ -11,47 +11,32 @@ pub fn itoa_bytes_universal(num: isize, buf: &mut [u8; 33], num_sys: u8) -> usiz
     let mut negative = false;
 
     if n == 0 {
-        unsafe {
-            *buf.get_mut(0).unwrap_unchecked() = b'0';
-            return 1;
-        }
+        *buf.get_mut(0).unwrap() = b'0';
+        return 1;
     }
 
     if n < 0 {
-        buf[0] = b'-';
         n = -n;
         negative = true;
     }
 
     while n > 0 {
-        unsafe {
-            *_buf.get_mut(idx).unwrap_unchecked() = *alphabet
-                .get((n % num_sys as isize) as usize)
-                .unwrap_unchecked();
-        }
+        *_buf.get_mut(idx).unwrap() = *alphabet.get((n % num_sys as isize) as usize).unwrap();
 
         idx += 1;
         n /= num_sys as isize;
     }
 
-    let mut ridx = idx;
-
-    while idx > 0 {
-        unsafe {
-            *buf.get_mut(idx + if negative { 1 } else { 0 })
-                .unwrap_unchecked() = *_buf.get(ridx - idx).unwrap_unchecked();
-        }
-
-        idx -= 1;
+    if negative {
+        _buf[idx] = b'-';
+        idx += 1;
     }
 
-    ridx += 1;
-
-    unsafe {
-        *buf.get_mut(ridx).unwrap_unchecked() = *_buf.get(0).unwrap_unchecked();
+    for i in 0..idx {
+        *buf.get_mut(i).unwrap() = *_buf.get(idx - i - 1).unwrap();
     }
 
-    ridx + if negative { 1 } else { 0 }
+    idx
 }
 
 pub fn itoa_bytes_universal_unsigned(num: usize, buf: &mut [u8; 33], num_sys: u8) -> usize {
@@ -65,38 +50,21 @@ pub fn itoa_bytes_universal_unsigned(num: usize, buf: &mut [u8; 33], num_sys: u8
     let mut idx: usize = 0;
 
     if n == 0 {
-        unsafe {
-            *buf.get_mut(0).unwrap_unchecked() = b'0';
-            return 1;
-        }
+        *buf.get_mut(0).unwrap() = b'0';
+        return 1;
     }
 
-    while n > 0 {
-        unsafe {
-            *_buf.get_mut(idx).unwrap_unchecked() = *alphabet
-                .get((n % num_sys as usize) as usize)
-                .unwrap_unchecked();
-        }
+   while n > 0 {
+        *_buf.get_mut(idx).unwrap() = *alphabet.get(n % num_sys as usize).unwrap();
 
         idx += 1;
         n /= num_sys as usize;
     }
 
-    let mut ridx = idx;
-
-    while idx > 0 {
-        unsafe {
-            *buf.get_mut(idx).unwrap_unchecked() = *_buf.get(ridx - idx).unwrap_unchecked();
-        }
-
-        idx -= 1;
+    for i in 0..idx {
+        *buf.get_mut(i).unwrap() = *_buf.get(idx - i - 1).unwrap();
     }
 
-    ridx += 1;
+    idx
 
-    unsafe {
-        *buf.get_mut(ridx).unwrap() = *_buf.get(0).unwrap_unchecked();
-    }
-
-    ridx
 }

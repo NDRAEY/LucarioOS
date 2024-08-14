@@ -14,11 +14,11 @@ DEBUG ?= true
 ifeq ($(DEBUG),true)
 	CARGO_DEBUG = 
 	# DEPS = target/$(TARGET)/debug/deps/
-	DEPS = target/i686/debug/deps/
+	STATIC_LIB_PATH = target/i686/debug/
 else
 	CARGO_DEBUG = --release
 	# DEPS = target/$(TARGET)/release/deps/
-	DEPS = target/i686/release/deps/
+	STATIC_LIB_PATH = target/i686/release/
 endif
 
 all: $(KERNEL)
@@ -30,14 +30,13 @@ $(KERNEL): Cargo.toml src/*.rs src/*/*.rs $(C_OBJS) $(ASM)
 	rustup component add rust-src --toolchain $(TOOLCHAIN)
 	@$(RUSTUP) target add x86_64-unknown-none
 
-	$(CARGO) rustc $(CARGO_DEBUG) --target $(TARGET) -Zbuild-std -- \
-				--emit=obj \
+	$(CARGO) rustc $(CARGO_DEBUG) \
+				--target $(TARGET) \
+				-Zbuild-std -- \
 				-C panic=abort \
-				-C overflow-checks=off \
-				-C default-linker-libraries=false \
-				-C link-args='-Tsrc/link.ld'
-
-	$(LD) -n $(DEPS)/*.o $(DEPS)/*.rlib $(ASM) $(C_OBJS) \
+				-C relocation-model=static
+# -C default-linker-libraries=false
+	$(LD) -n $(STATIC_LIB_PATH)/liblucario_os.a $(ASM) $(C_OBJS)\
 		-T src/link.ld \
 		-o $(KERNEL)
 
@@ -57,7 +56,7 @@ iso: $(KERNEL)
 	grub-mkrescue isodir/ -o LucarioOS.iso -V LucarioOS
 
 run:
-	qemu-system-x86_64 -d int,guest_errors -m 32M -serial mon:stdio -cdrom LucarioOS.iso -no-reboot
+	qemu-system-x86_64 -m 32M -serial mon:stdio -cdrom LucarioOS.iso -no-reboot
 
 runiso:
 	$(MAKE) iso
