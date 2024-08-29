@@ -1,5 +1,5 @@
-#[repr(C, packed)]
-#[derive(Copy, Clone)]
+#[repr(C, packed(1))]
+//#[derive(Copy, Clone)]
 pub struct MultibootHeader {
     pub flags: u32,
     pub mem_lower: u32,
@@ -19,6 +19,7 @@ pub struct MultibootHeader {
     pub config_table: u32,
     pub boot_loader_name: u32,
     pub apm_table: u32,
+    
     pub vbe_control_info: u32,
     pub vbe_mode_info: u32,
     pub vbe_mode: u16,
@@ -32,6 +33,13 @@ pub struct MultibootHeader {
     pub framebuffer_height: u32,
     pub framebuffer_bpp: u8,
     pub framebuffer_type: u8,
+
+    pub framebuffer_red_field_position: u8,
+    pub framebuffer_red_mask_size: u8,
+    pub framebuffer_green_field_position: u8,
+    pub framebuffer_green_mask_size: u8,
+    pub framebuffer_blue_field_position: u8,
+    pub framebuffer_blue_mask_size: u8,
 }
 
 #[repr(C, packed)]

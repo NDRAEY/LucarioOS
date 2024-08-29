@@ -28,7 +28,7 @@ use crate::{
 };
 
 #[no_mangle]
-#[allow(arithmetic_overflow)]
+//:#[allow(arithmetic_overflow)]
 pub unsafe extern "C" fn _start(multiboot_addr: u32, _stack_top: u32) -> ! {
     com_init(DEBUG_PORT);
 
@@ -37,22 +37,29 @@ pub unsafe extern "C" fn _start(multiboot_addr: u32, _stack_top: u32) -> ! {
     interrupts::init();
 
     debug!("Hello world from Rust!", 12345);
+    debug!("Size:", core::mem::size_of::<MultibootHeader>());
+    let mb: *const MultibootHeader = multiboot_addr as *const MultibootHeader;
 
-    let mb: MultibootHeader = *(multiboot_addr as *const MultibootHeader);
-    let mut addr = mb.framebuffer_addr as usize;
+    {
+        debug!("MBaddr:", Hexadecimal::Unsigned(multiboot_addr as usize));
+    }
 
-    let width = mb.framebuffer_width as usize;
-    let height = mb.framebuffer_height as usize;
+    let ml = (*mb).mmap_length;
+    let ss = (*mb).mmap_addr;
+    debug!("Memory map:", Hexadecimal::Unsigned(ss as usize), ml);
+    
+    let mut addr = (*mb).framebuffer_addr as usize;
+
+    let width = (*mb).framebuffer_width as usize;
+    let height = (*mb).framebuffer_height as usize;
     //let fb_bpp = mb.framebuffer_bpp as usize;
     //let fb_pitch = mb.framebuffer_pitch as usize;
 
     debug!("Creating memory manager");
 
-    mem::physical::ginit(&mb);
-    //let mut memory_manager = mem::physical::PhysicalMemoryManager::new(&mb);
+    mem::physical::ginit(mb);
 
     debug!("Initializing...");
-    //mem::physical::PHYS_MEMORY_MANAGER.init((mb.mods_addr  + 0xC000_0000) as *const MultibootModList, mb.mods_count as usize);
 
     /*debug!("Found", memory_manager.available());
 
