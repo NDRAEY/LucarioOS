@@ -3,7 +3,7 @@
 .set MEMINFO,	 				1<<1
 .set VBE_MODE,   				1<<2
 .set INIT_MBOOT_HEADER_MAGIC,   0x1BADB002
-.set INIT_MBOOT_HEADER_FLAGS,   ALIGN | MEMINFO | VBE_MODE
+.set INIT_MBOOT_HEADER_FLAGS,   ALIGN + MEMINFO + VBE_MODE
 .set INIT_MBOOT_CHECKSUM,       0x00000000 - (INIT_MBOOT_HEADER_MAGIC + INIT_MBOOT_HEADER_FLAGS)
 
 .set STACK_SIZE, 1024 * 64  # 64 KB
@@ -29,6 +29,7 @@
 # Our page directory and page table
 .section .bss, "aw", @nobits
 	.align 4096
+    .global boot_page_directory
     boot_page_directory:
         .skip 4096
     boot_page_table:

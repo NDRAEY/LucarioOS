@@ -8,12 +8,12 @@
 mod log;
 mod conv;
 mod display;
+mod gdt;
 mod interrupts;
 mod mem;
 mod multiboot;
 mod ports;
 mod stubs;
-mod gdt;
 
 use core::panic::PanicInfo;
 
@@ -23,7 +23,7 @@ use crate::conv::fmt::Hexadecimal;
 use crate::{
     display::{console::TTY, real_canvas::Canvas},
     log::log::*,
-    multiboot::MultibootModList,
+    multiboot::MultibootModListEntry,
     ports::com_init,
 };
 
@@ -39,7 +39,7 @@ pub unsafe extern "C" fn _start(multiboot_addr: u32, _stack_top: u32) -> ! {
     debug!("Hello world from Rust!", 12345);
 
     let mb: MultibootHeader = *(multiboot_addr as *const MultibootHeader);
-    let addr = mb.framebuffer_addr as usize;
+    let mut addr = mb.framebuffer_addr as usize;
 
     let width = mb.framebuffer_width as usize;
     let height = mb.framebuffer_height as usize;
@@ -48,8 +48,11 @@ pub unsafe extern "C" fn _start(multiboot_addr: u32, _stack_top: u32) -> ! {
 
     debug!("Creating memory manager");
 
-    let mut memory_manager = mem::physical::PhysicalMemoryManager::new(&mb);
-    memory_manager.init((mb.mods_addr  + 0xC000_0000) as *const MultibootModList, mb.mods_count as usize);
+    mem::physical::ginit(&mb);
+    //let mut memory_manager = mem::physical::PhysicalMemoryManager::new(&mb);
+
+    debug!("Initializing...");
+    //mem::physical::PHYS_MEMORY_MANAGER.init((mb.mods_addr  + 0xC000_0000) as *const MultibootModList, mb.mods_count as usize);
 
     /*debug!("Found", memory_manager.available());
 
@@ -78,7 +81,14 @@ extern "C" fn __eh_personality() {}
 #[panic_handler]
 #[no_mangle]
 fn __panic_handler(info: &PanicInfo) -> ! {
-    // debug!("Panic encountered! ", file!(), " : --");
-    // debug!("Panic! Message: ", info.message().unwrap().as_str().unwrap());
+    debug!(
+        "Panic encountered! ",
+        info.location().unwrap().file(),
+        info.location().unwrap().line()
+    );
+    debug!(
+        "Panic! Message: ",
+        info.message().unwrap().as_str().unwrap()
+    );
     loop {}
 }

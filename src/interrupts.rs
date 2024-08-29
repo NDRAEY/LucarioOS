@@ -102,7 +102,10 @@ static mut IDT_ENTRIES: [IDTEntry; 256] = [IDTEntry {
     base_high: 0,
 }; 256];
 
-static mut IDT_POINTER: IDTPointer = IDTPointer { limit: 0, base: core::ptr::null() };
+static mut IDT_POINTER: IDTPointer = IDTPointer {
+    limit: 0,
+    base: core::ptr::null(),
+};
 
 use crate::log::log::DebugWrite;
 
@@ -117,11 +120,7 @@ pub unsafe fn init() {
     IDT_POINTER.base = &IDT_ENTRIES as *const IDTEntry;
     //IDT_POINTER.base = core::mem::transmute(&IDT_ENTRIES);
 
-    debug!("Base");
-
     IDT_POINTER.limit = ((core::mem::size_of::<IDTEntry>() * 256) - 1) as u16;
-
-    debug!("PW");
 
     out8(0x20, 0x11);
     out8(0xA0, 0x11);
@@ -139,7 +138,6 @@ pub unsafe fn init() {
     out8(0xA1, 0x0);
 
     core::arch::asm!("nop");
-    debug!("Setup", Hexadecimal::Unsigned(isr0 as usize));
 
     set_gate(0, isr0 as u32, 0x08, 0x8E);
     set_gate(1, isr1 as u32, 0x08, 0x8E);
@@ -196,20 +194,38 @@ pub unsafe fn init() {
 
     set_gate(0x80, isr80 as u32, 0x08, 0xEF);
 
-    debug!("Flush");
+    debug!(
+        "Pointer:",
+        Hexadecimal::Unsigned(&IDT_POINTER as *const IDTPointer as usize)
+    );
+    debug!(
+        "Entries:",
+        Hexadecimal::Unsigned(&IDT_ENTRIES as *const IDTEntry as usize)
+    );
+    debug!("Limit:", Hexadecimal::Unsigned(IDT_POINTER.limit as usize));
 
     idt_flush(&IDT_POINTER as *const IDTPointer);
 
-    debug!("Okay!");
-
     core::arch::asm!("sti");
 
-    debug!("Ew!");
+    register_handler(14, page_fault);
+}
+
+pub fn page_fault(regs: X86Registers) {
+    let cr2: u32;
+    unsafe {
+        core::arch::asm!("mov {0:e}, cr2", out(reg) cr2);
+    }
+
+    debug!(
+        "Page fault at address: ",
+        Hexadecimal::Unsigned(cr2 as usize)
+    );
+
+    loop {}
 }
 
 pub unsafe fn set_gate(num: usize, base: u32, selector: u16, flags: u8) {
-    debug!("Gate!");
-
     IDT_ENTRIES[num].base_low = base as u16 & 0xFFFF;
     IDT_ENTRIES[num].base_high = (base >> 16) as u16 & 0xFFFF as u16;
 
@@ -223,9 +239,10 @@ static mut INTERRUPT_HANDLERS: [*const u32; 256] = [0 as *const _; 256];
 
 #[no_mangle]
 pub unsafe extern "C" fn isr_handler(regs: X86Registers) {
+    debug!("Interrupt!");
     let handler = INTERRUPT_HANDLERS[regs.int_num as usize] as *const ();
     if handler != core::ptr::null_mut() {
-        let f: fn(X86Registers) -> u32 = core::mem::transmute(handler);
+        let f: fn(X86Registers) = core::mem::transmute(handler);
         f(regs);
     }
 }
@@ -241,7 +258,13 @@ pub unsafe extern "C" fn irq_handler(regs: X86Registers) {
     let handler = INTERRUPT_HANDLERS[regs.int_num as usize];
 
     if handler != core::ptr::null_mut() {
-        let f: fn(X86Registers) -> u32 = core::mem::transmute(handler);
+        let f: fn(X86Registers) = core::mem::transmute(handler);
         f(regs);
+    }
+}
+
+pub fn register_handler(interrupt_nr: usize, func: fn(X86Registers)) {
+    unsafe {
+        INTERRUPT_HANDLERS[interrupt_nr] = func as *const u32;
     }
 }

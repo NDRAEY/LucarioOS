@@ -1,4 +1,4 @@
-#[repr(C)]
+#[repr(C, packed)]
 #[derive(Copy, Clone)]
 pub struct MultibootHeader {
     pub flags: u32,
@@ -34,19 +34,19 @@ pub struct MultibootHeader {
     pub framebuffer_type: u8,
 }
 
-#[repr(C)]
-pub struct MultibootModList {
+#[repr(C, packed)]
+pub struct MultibootModListEntry {
     pub mod_start: u32,
     pub mod_end: u32,
     pub cmdline: u32,
 }
 
-#[repr(C)]
+#[repr(C, packed)]
 pub struct MemoryMapEntry {
     pub size: u32,
     pub addr_low: u32,
-    addr_high: u32,
+    pub addr_high: u32,
     pub len_low: u32,
-    len_high: u32,
+    pub len_high: u32,
     pub type_: u32,
 }

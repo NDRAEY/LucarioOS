@@ -1,7 +1,8 @@
+use core::arch::asm;
 use core::mem::size_of;
 
 use crate::conv::fmt::Hexadecimal;
-use crate::multiboot;
+use crate::multiboot::*;
 use crate::stubs::mem::memset;
 
 use crate::log::log::DebugWrite;
@@ -9,40 +10,58 @@ use crate::log::log::DebugWrite;
 #[macro_use]
 use crate::debug;
 
-const BITMAP_SIZE: usize = 128 << 10; // 128 KB is enough to store info about 4 GB of space
+const BITMAP_SIZE: usize = 512 << 10; // 512 KB is enough to store info about 4 GB of space
 const PAGE_SIZE: usize = 4096;
 const PAGE_DIRECTORY_START: usize = 0xffffffff - (4 << 20) + 1;
 
 const PAGE_PRESENT: usize = 1 << 0;
-const PAGE_WRITEABLE: usize = (1 << 1);
-const PAGE_USER: usize = (1 << 2);
-const PAGE_WRITE_THROUGH: usize = (1 << 3);
-const PAGE_CACHE_DISABLE: usize = (1 << 4);
-const PAGE_ACCESSED: usize = (1 << 5);
-const PAGE_DIRTY: usize = (1 << 6);
-const PAGE_GLOBAL: usize = (1 << 8);
+const PAGE_WRITEABLE: usize = 1 << 1;
+const PAGE_USER: usize = 1 << 2;
+const PAGE_WRITE_THROUGH: usize = 1 << 3;
+const PAGE_CACHE_DISABLE: usize = 1 << 4;
+const PAGE_ACCESSED: usize = 1 << 5;
+const PAGE_DIRTY: usize = 1 << 6;
+const PAGE_GLOBAL: usize = 1 << 8;
 
 type PhysicalAddress = usize;
 type VirtualAddress = usize;
 
-pub struct PhysicalMemoryManager {
+pub struct PhysicalMemoryManager<'a> {
     initialized: bool,
-    bitmap: [u8; BITMAP_SIZE],
+    bitmap: &'a mut [u8],
     used: usize,
     available: usize,
-    kernel_page_directory: core::option::Option<*mut u32>,
+    kernel_page_directory: Option<*mut u32>,
 }
 
 extern "C" {
+    static KERNEL_PHYS_START: u32;
     static KERNEL_PHYS_END: u32;
+    static boot_page_directory: u32;
 }
 
-impl PhysicalMemoryManager {
-    pub fn new(mmap: &multiboot::MultibootHeader) -> Self {
+static mut PHYS_MEM_MANAGER: Option<PhysicalMemoryManager> = None;
+static mut BITMAP: [u8; BITMAP_SIZE] = [0; BITMAP_SIZE];
+
+pub unsafe fn ginit(mb: *const MultibootHeader) {
+    PHYS_MEM_MANAGER = Some(PhysicalMemoryManager::new(&*mb));
+
+    PHYS_MEM_MANAGER.as_mut().unwrap().init(
+        ((*mb).mods_addr + 0xC000_0000) as *const MultibootModListEntry,
+        (*mb).mods_count as usize,
+    );
+}
+
+impl PhysicalMemoryManager<'_> {
+    pub fn new(mb: &MultibootHeader) -> Self {
+        debug!("Initialization!");
+
+        debug!(mb.mem_upper as usize);
+
         let memsize = unsafe {
             Self::scan_memory_map(
-                (mmap.mmap_addr + 0xC000_0000) as (*const multiboot::MemoryMapEntry),
-                mmap.mmap_length,
+                (mb.mmap_addr + 0xC000_0000) as *const MemoryMapEntry,
+                mb.mmap_length,
             )
         };
 
@@ -50,19 +69,19 @@ impl PhysicalMemoryManager {
 
         PhysicalMemoryManager {
             initialized: false,
-            bitmap: [0; BITMAP_SIZE],
+            bitmap: unsafe { &mut BITMAP },
             used: 0,
             available: memsize,
             kernel_page_directory: None,
         }
     }
 
-    pub unsafe fn init(&mut self, modinfo: *const multiboot::MultibootModList, length: usize) {
+    pub unsafe fn init(&mut self, modinfo: *const MultibootModListEntry, length: usize) {
         debug!("LEN:", length);
 
         let lx = &KERNEL_PHYS_END as *const _ as u32;
 
-        debug!("Addr:", lx);
+        debug!("Addr:", Hexadecimal::Unsigned(lx as usize));
 
         let suitable_addr = if length == 0 {
             lx
@@ -71,14 +90,43 @@ impl PhysicalMemoryManager {
         };
 
         debug!("ADDR:", Hexadecimal::Unsigned(suitable_addr as usize));
+
+        let start = &KERNEL_PHYS_START as *const _ as u32;
+        let mut start_addr = 0xC000_0000 + start;
+
+        while start_addr <= 0xC000_0000 + lx {
+            self.mark_page(start_addr as usize, true);
+            //debug!("Marked:", Hexadecimal::Unsigned(start_addr as usize));
+            start_addr += PAGE_SIZE as u32;
+        }
+
+        debug!(Hexadecimal::Unsigned(self.alloc_page()));
+        debug!(Hexadecimal::Unsigned(self.alloc_page()));
+        debug!(Hexadecimal::Unsigned(self.alloc_page()));
+        debug!(Hexadecimal::Unsigned(self.alloc_page()));
+        debug!(Hexadecimal::Unsigned(self.alloc_page()));
+        debug!(Hexadecimal::Unsigned(self.alloc_page()));
+        debug!(Hexadecimal::Unsigned(self.alloc_page()));
+
+        let pdaddr = &boot_page_directory as *const _ as u32;
+        self.kernel_page_directory = Some(pdaddr as *mut u32);
     }
 
-    unsafe fn scan_memory_map(memmap: *const multiboot::MemoryMapEntry, length: u32) -> usize {
+    unsafe fn scan_memory_map(memmap: *const MemoryMapEntry, length: u32) -> usize {
         let mut memory_found: usize = 0;
-        let entry_size: u32 = core::mem::size_of::<multiboot::MemoryMapEntry>() as u32;
+        let entry_size: u32 = size_of::<MemoryMapEntry>() as u32;
+        let entry_count = length / entry_size;
 
-        for idx in 0..(length / entry_size) {
+        debug!("Len:", length, "Size:", entry_size);
+
+        for idx in 0..=entry_count {
             let entry = memmap.add(idx as _).read();
+            debug!(
+                Hexadecimal::Unsigned(entry.addr_low as usize),
+                " - size ",
+                Hexadecimal::Unsigned(entry.len_low as usize),
+                " bytes"
+            );
 
             if entry.type_ == 1 {
                 memory_found += entry.len_low as usize;
@@ -91,6 +139,7 @@ impl PhysicalMemoryManager {
     pub fn available(&self) -> usize {
         self.available
     }
+
     pub fn used(&self) -> usize {
         self.used
     }
@@ -264,7 +313,7 @@ impl PhysicalMemoryManager {
 
     #[inline]
     pub unsafe fn reload_cr3() {
-        core::arch::asm!("mov %cr3, %eax\nmov %eax, %cr3");
+        asm!("mov %cr3, %eax\nmov %eax, %cr3");
     }
 
     pub unsafe fn map_page(

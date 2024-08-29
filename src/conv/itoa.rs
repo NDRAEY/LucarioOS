@@ -54,7 +54,7 @@ pub fn itoa_bytes_universal_unsigned(num: usize, buf: &mut [u8; 33], num_sys: u8
         return 1;
     }
 
-   while n > 0 {
+    while n > 0 {
         *_buf.get_mut(idx).unwrap() = *alphabet.get(n % num_sys as usize).unwrap();
 
         idx += 1;

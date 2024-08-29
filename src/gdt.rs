@@ -7,13 +7,13 @@ struct GDTEntry {
     base_middle: u8,
     access: u8,
     granularity: u8,
-    base_high: u8
+    base_high: u8,
 }
 
 #[repr(C, packed)]
 struct GDTPointer {
     limit: u16,
-    base: *const GDTEntry
+    base: *const GDTEntry,
 }
 
 impl GDTEntry {
@@ -26,7 +26,7 @@ impl GDTEntry {
             base_middle: ((base >> 16) & 0xff) as u8,
             base_high: ((base >> 24) & 0xff) as u8,
 
-            access
+            access,
         }
     }
 }
@@ -39,16 +39,22 @@ static mut GDT_REAL: [GDTEntry; 5] = [
     GDTEntry::new(0, 0xffff_ffff, 0xf2, 0xcf),
 ];
 
-static mut GDT_POINTER: GDTPointer = GDTPointer { limit: 0, base: core::ptr::null() };
+static mut GDT_POINTER: GDTPointer = GDTPointer {
+    limit: 0,
+    base: core::ptr::null(),
+};
 
-use crate::{log::log::DebugWrite, debug};
+use crate::{debug, log::log::DebugWrite};
 
 extern "C" {
     fn gdt_flush(a: *const GDTPointer);
 }
 
 pub unsafe fn init() {
-    GDT_POINTER = GDTPointer { limit: (GDT_REAL.len() * size_of::<GDTEntry>() - 1) as u16, base: &GDT_REAL as *const GDTEntry }; 
+    GDT_POINTER = GDTPointer {
+        limit: (GDT_REAL.len() * size_of::<GDTEntry>() - 1) as u16,
+        base: &GDT_REAL as *const GDTEntry,
+    };
 
     gdt_flush(&GDT_POINTER);
 

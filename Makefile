@@ -46,7 +46,7 @@ $(ASM): asm/%.o : asm/%.S
 
 $(C_OBJS): c/%.o : c/%.c
 	@echo -e '\x1b[32mC  \x1b[0m' $@
-	@$(CC) $< -ffreestanding -mno-sse -mno-avx -nostdlib -fno-builtin -fno-stack-protector -m32 -c -o $@
+	@$(CC) $< -ffreestanding -mno-sse -mno-avx -nostdlib -fno-builtin -fno-stack-protector -m32 -mno-red-zone -c -o $@
 
 iso: $(KERNEL)
 	-mkdir -p isodir/boot/grub
@@ -56,7 +56,7 @@ iso: $(KERNEL)
 	grub-mkrescue isodir/ -o LucarioOS.iso -V LucarioOS
 
 run:
-	qemu-system-x86_64 -m 32M -serial mon:stdio -cdrom LucarioOS.iso -no-reboot
+	qemu-system-x86_64 -m 128M -serial mon:stdio -cdrom LucarioOS.iso -no-reboot #-d int,guest_errors
 
 runiso:
 	$(MAKE) iso

@@ -16,3 +16,4 @@ overflow-checks = false
 
 [dependencies]
 lazy_static = { version = "1.4.0", features = ["spin_no_std"] }
+unifont = "1.1.0"

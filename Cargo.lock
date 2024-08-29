@@ -16,6 +16,7 @@ name = "lucario_os"
 version = "0.0.1"
 dependencies = [
  "lazy_static",
+ "unifont",
 ]
 
 [[package]]
@@ -23,3 +24,9 @@ name = "spin"
 version = "0.5.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "6e63cff320ae2c57904679ba7cb63280a3dc4613885beafb148ee7bf9aa9042d"
+
+[[package]]
+name = "unifont"
+version = "1.1.0+data-15.1.05"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "8eb5abf597aaa6fff19801d6747672f56e618d60002e7191ea92773a5bcae156"
